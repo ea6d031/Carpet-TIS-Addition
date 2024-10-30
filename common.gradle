@@ -42,7 +42,7 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// mods
-	if (project.carpet_core_version.startsWith('com.github.Fallen-Breath:fabric-carpet:')) {
+	if (project.carpet_core_version.matches('^com.github.[a-zA-Z0-9_-]+:fabric-carpet:[a-z0-9]+$')) {
 		modImplementation project.carpet_core_version  // jitpack
 	} else {
 		modImplementation "carpet:fabric-carpet:${project.carpet_core_version}"  // masa's maven
@@ -187,8 +187,16 @@ processResources {
 				"version": fullModVersion,
 				"carpet_dependency": project.carpet_dependency,
 				"minecraft_dependency": project.minecraft_dependency,
-				"lithium_confliction": project.getProperties().getOrDefault('lithium_confliction', '<0.0.0')
 		]
+
+		String lc = project.getProperties().getOrDefault('lithium_confliction', '<0.0.0')
+		if (lc.contains(',')) {
+			def arr = '[' + lc.split(',').collect { s -> '"' + s + '"'}.join(', ') + ']'
+			filter { s -> s.replace('"${lithium_confliction}"', arr) }
+		} else {
+			valueMap.put('lithium_confliction', lc)
+		}
+
 		expand valueMap
 	}
 
